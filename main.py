@@ -3,22 +3,27 @@ from flask import Flask
 from telegram.ext import Application, CommandHandler
 
 # إعداد Flask
-server = Flask(__name__)
+app_flask = Flask(__name__)
 
-@server.route("/")
+@app_flask.route("/")
 def home():
-    return "✅ Healthcare Lagna Bot is alive!"
+    return "✅ Bot is running on Render"
 
-# إعداد البوت
-TOKEN = os.getenv("BOT_TOKEN")  # التوكن لازم يكون في Environment Variables بـ Render
-
-app = Application.builder().token(TOKEN).build()
+# بوت تيليجرام
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+bot = Application.builder().token(BOT_TOKEN).build()
 
 async def start(update, context):
-    await update.message.reply_text("👋 مرحبا! أنا مساعدك وعضو لجنة الرعاية الصحية الإلكتروني.")
+    await update.message.reply_text("👋 مرحبا بك! البوت يعمل.")
 
-app.add_handler(CommandHandler("start", start))
+bot.add_handler(CommandHandler("start", start))
 
 if __name__ == "__main__":
-    # نشغل البوت polling
-    app.run_polling()
+    import threading
+
+    # Thread لتشغيل البوت
+    threading.Thread(target=lambda: bot.run_polling()).start()
+
+    # تشغيل Flask على بورت Render
+    port = int(os.getenv("PORT", 5000))
+    app_flask.run(host="0.0.0.0", port=port)
